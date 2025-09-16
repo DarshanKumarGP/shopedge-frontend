@@ -1,5 +1,6 @@
 import React from 'react';
 import { AppBar, Toolbar, Box, Container, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { Logo } from '../../common/Logo/Logo';
 import { CartIcon } from '../../common/CartIcon/CartIcon';
 import { ProfileDropdown } from '../../common/ProfileDropdown/ProfileDropdown';
@@ -10,6 +11,12 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ cartCount, username }) => {
+  const navigate = useNavigate();
+
+  const handleCartClick = () => {
+    navigate('/cart');
+  };
+
   return (
     <AppBar
       position="sticky"
@@ -43,7 +50,9 @@ export const Header: React.FC<HeaderProps> = ({ cartCount, username }) => {
             >
               Welcome, {username}!
             </Typography>
-            <CartIcon count={cartCount} />
+            <Box onClick={handleCartClick} sx={{ cursor: 'pointer' }}>
+              <CartIcon count={cartCount} />
+            </Box>
             <ProfileDropdown username={username} />
           </Box>
         </Toolbar>

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'react-hot-toast';
 import { theme } from './styles/theme';
+import { CartPage } from './pages/Customer/CartPage';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import RegisterPage from './pages/Auth/Register';
 import LoginPage from './pages/Auth/Login';
@@ -40,8 +41,8 @@ function App() {
             <Route path="/customerhome" element={<CustomerHome />} />
             <Route path="/adminhome" element={<AdminHome />} />
             
-            {/* Cart Route (placeholder) */}
-            <Route path="/cart" element={<div>Cart Page - Coming Soon!</div>} />
+            {/* Cart Route */}
+            <Route path="/cart" element={<CartPage />} />
             
             {/* Catch all route - redirect to login */}
             <Route path="*" element={<Navigate to="/login" replace />} />
