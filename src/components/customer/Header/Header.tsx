@@ -1,8 +1,8 @@
 import React from 'react';
-import { AppBar, Toolbar, Box, Container, Typography } from '@mui/material';
+import { AppBar, Toolbar, Box, Container, Typography, IconButton, Badge } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { Logo } from '../../common/Logo/Logo';
-import { CartIcon } from '../../common/CartIcon/CartIcon';
+import { ShoppingCart } from '@mui/icons-material';
 import { ProfileDropdown } from '../../common/ProfileDropdown/ProfileDropdown';
 
 interface HeaderProps {
@@ -13,46 +13,64 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ cartCount, username }) => {
   const navigate = useNavigate();
 
-  const handleCartClick = () => {
-    navigate('/cart');
-  };
-
   return (
     <AppBar
       position="sticky"
-      elevation={0}
+      elevation={4}
       sx={{
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
+        backgroundColor: 'white',
+        color: '#1e293b',
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid #e2e8f0',
       }}
     >
       <Container maxWidth="xl">
-        <Toolbar 
-          sx={{ 
-            justifyContent: 'space-between', 
-            py: 1.5,
-            minHeight: { xs: '64px', md: '70px' },
+        <Toolbar
+          sx={{
+            justifyContent: 'space-between',
+            py: { xs: 1, md: 0.75 },
+            minHeight: { xs: '56px', md: '64px' },
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+            onClick={() => navigate('/')}
+          >
             <Logo />
           </Box>
-          
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, md: 3 } }}>
             <Typography
-              variant="body1"
+              variant="body2"
               sx={{
-                color: 'rgba(255,255,255,0.9)',
-                fontWeight: 500,
                 display: { xs: 'none', sm: 'block' },
+                fontWeight: 500,
               }}
             >
               Welcome, {username}!
             </Typography>
-            <Box onClick={handleCartClick} sx={{ cursor: 'pointer' }}>
-              <CartIcon count={cartCount} />
-            </Box>
+
+            <IconButton
+              onClick={() => navigate('/cart')}
+              color="primary"
+              size="large"
+              sx={{ ml: 1 }}
+            >
+              <Badge
+                badgeContent={cartCount}
+                color="success"
+                sx={{
+                  '& .MuiBadge-badge': {
+                    fontSize: '0.75rem',
+                    height: '18px',
+                    minWidth: '18px',
+                  },
+                }}
+              >
+                <ShoppingCart />
+              </Badge>
+            </IconButton>
+
             <ProfileDropdown username={username} />
           </Box>
         </Toolbar>
