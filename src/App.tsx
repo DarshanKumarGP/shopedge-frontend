@@ -5,14 +5,18 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+
 import { theme } from './styles/theme';
 import { CartPage } from './pages/Customer/CartPage';
 import { OrdersPage } from './pages/Customer/OrdersPage';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import RegisterPage from './pages/Auth/Register';
 import LoginPage from './pages/Auth/Login';
 import CustomerHome from './pages/Customer/CustomerHome';
-import AdminHome from './pages/Admin/AdminHome';
+
+import AdminLogin from './pages/Admin/AdminLogin/AdminLogin';
+import AdminDashboard from './pages/Admin/AdminDashboard/AdminDashboard';
+import AdminGuard from './pages/Admin/AdminGuard/AdminGuard';
 
 // Enhanced Global Styles for modern look
 const globalStyles = (
@@ -39,7 +43,6 @@ const globalStyles = (
         height: '100%',
         minHeight: '100vh',
       },
-      // Custom scrollbar styles
       '::-webkit-scrollbar': {
         width: '8px',
         height: '8px',
@@ -58,7 +61,6 @@ const globalStyles = (
       '::-webkit-scrollbar-corner': {
         background: '#f1f5f9',
       },
-      // Selection styles
       '::selection': {
         background: 'rgba(102, 126, 234, 0.2)',
         color: '#1e293b',
@@ -67,13 +69,11 @@ const globalStyles = (
         background: 'rgba(102, 126, 234, 0.2)',
         color: '#1e293b',
       },
-      // Focus styles
       'button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible': {
         outline: '2px solid #667eea',
         outlineOffset: '2px',
         borderRadius: '4px',
       },
-      // Animation utilities
       '.fade-in': {
         animation: 'fadeIn 0.5s ease-in-out',
       },
@@ -85,16 +85,15 @@ const globalStyles = (
         to: { opacity: 1 },
       },
       '@keyframes slideIn': {
-        from: { 
-          opacity: 0, 
-          transform: 'translateY(20px)' 
+        from: {
+          opacity: 0,
+          transform: 'translateY(20px)',
         },
-        to: { 
-          opacity: 1, 
-          transform: 'translateY(0)' 
+        to: {
+          opacity: 1,
+          transform: 'translateY(0)',
         },
       },
-      // Loading states
       '.loading': {
         position: 'relative',
         overflow: 'hidden',
@@ -123,13 +122,12 @@ const globalStyles = (
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 10, // 10 minutes (formerly cacheTime)
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 10,
       refetchOnWindowFocus: false,
       refetchOnMount: true,
       refetchOnReconnect: true,
       retry: (failureCount, error: any) => {
-        // Don't retry on 4xx errors except 408, 429
         if (error?.status >= 400 && error?.status < 500 && ![408, 429].includes(error.status)) {
           return false;
         }
@@ -151,31 +149,29 @@ const AnimatedRoutes: React.FC = () => {
   return (
     <AnimatePresence mode="wait" initial={false}>
       <Routes location={location} key={location.pathname}>
-        {/* Default route redirects to login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
-        
-        {/* Authentication Routes */}
+
+        {/* Authentication */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        
-        {/* Role-based Home Routes */}
+
+        {/* Customer */}
         <Route path="/customerhome" element={<CustomerHome />} />
-        <Route path="/adminhome" element={<AdminHome />} />
-        
-        {/* Customer Feature Routes */}
         <Route path="/cart" element={<CartPage />} />
         <Route path="/orders" element={<OrdersPage />} />
-        
-        {/* Future routes (placeholder for now) */}
-        <Route path="/profile" element={<Navigate to="/customerhome" />} />
-        <Route path="/wishlist" element={<Navigate to="/customerhome" />} />
-        <Route path="/track-orders" element={<Navigate to="/orders" />} />
-        <Route path="/payment-methods" element={<Navigate to="/customerhome" />} />
-        <Route path="/settings" element={<Navigate to="/customerhome" />} />
-        <Route path="/support" element={<Navigate to="/customerhome" />} />
-        <Route path="/language" element={<Navigate to="/customerhome" />} />
-        
-        {/* Catch all route - redirect to login */}
+
+        {/* Admin */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <AdminGuard>
+              <AdminDashboard />
+            </AdminGuard>
+          }
+        />
+
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </AnimatePresence>
@@ -194,7 +190,8 @@ const toastConfig = {
       padding: '16px 20px',
       fontSize: '14px',
       fontWeight: '500',
-      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+      boxShadow:
+        '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
       backdropFilter: 'blur(10px)',
       border: '1px solid rgba(255, 255, 255, 0.2)',
       maxWidth: '420px',
@@ -245,15 +242,13 @@ function App() {
         <BrowserRouter>
           <div className="app-container fade-in">
             <AnimatedRoutes />
-            
-            {/* Enhanced Toast Notifications */}
+
+            {/* Toasts */}
             <Toaster {...toastConfig} />
-            
-            {/* React Query Devtools (only in development) - FIXED */}
+
+            {/* Devtools */}
             {process.env.NODE_ENV === 'development' && (
-              <ReactQueryDevtools 
-                initialIsOpen={false}
-              />
+              <ReactQueryDevtools initialIsOpen={false} />
             )}
           </div>
         </BrowserRouter>
