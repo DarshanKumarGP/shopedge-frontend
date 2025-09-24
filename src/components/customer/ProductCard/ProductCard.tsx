@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Card,
   CardContent,
@@ -27,6 +27,9 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
+  const [imageError, setImageError] = useState(false);
+  const imageAttempts = useRef(0);
+
   const handleAddToCart = () => {
     if (product.stock > 0) {
       onAddToCart(product.product_id);
@@ -43,110 +46,193 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
     }).format(price);
   };
 
+  // Fallback image logic
+  const getImageSources = () => {
+    const sources: string[] = [];
+    if (product.images && product.images.length > 0) {
+      product.images.forEach(img => {
+        if (img) {
+          sources.push(img.replace(/\s+/g, '%20'));
+          sources.push(img.replace(/\s+/g, '%20').replace(/\.png$/i, '.jpg'));
+          sources.push(img.replace(/\s+/g, '%20').replace(/\.jpg$/i, '.png'));
+        }
+      });
+    }
+    const categoryFallbacks: Record<string, string> = {
+      shirt: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=550&q=90',
+      pant: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=550&q=90',
+      mobile: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=550&q=90',
+      tv: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=550&q=90',
+      camera: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=550&q=90',
+      laptop: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=550&q=90',
+      accessory: 'https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?auto=format&fit=crop&w=550&q=90'
+    };
+    const name = product.name.toLowerCase();
+    if (name.includes('shirt')) sources.push(categoryFallbacks.shirt);
+    else if (name.includes('pant') || name.includes('jean') || name.includes('trouser')) sources.push(categoryFallbacks.pant);
+    else if (name.includes('mobile') || name.includes('phone') || name.includes('iphone') || name.includes('samsung')) sources.push(categoryFallbacks.mobile);
+    else if (name.includes('tv') || name.includes('television')) sources.push(categoryFallbacks.tv);
+    else if (name.includes('camera') || name.includes('dslr')) sources.push(categoryFallbacks.camera);
+    else if (name.includes('laptop') || name.includes('macbook')) sources.push(categoryFallbacks.laptop);
+    else sources.push(categoryFallbacks.accessory);
+
+    sources.push(`https://picsum.photos/550/550?random=${product.product_id}`);
+    sources.push(`https://via.placeholder.com/550x550/6366f1/fff?text=${encodeURIComponent(product.name.split(' ').slice(0, 2).join(' '))}`);
+    return sources;
+  };
+
+  const imageSources = getImageSources();
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    imageAttempts.current += 1;
+    if (imageAttempts.current < imageSources.length) {
+      img.src = imageSources[imageAttempts.current];
+    } else {
+      setImageError(true);
+    }
+  };
+
+  const handleImageLoad = () => {
+    setImageError(false);
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 25 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -8, scale: 1.02 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+      whileHover={{ y: -10, scale: 1.02 }}
+      transition={{ type: 'spring', stiffness: 260, damping: 24 }}
       style={{ height: '100%' }}
     >
       <Card
         sx={{
-          height: '480px', // FIXED HEIGHT for consistency
+          height: '590px',
           display: 'flex',
           flexDirection: 'column',
-          borderRadius: 3,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          borderRadius: 4,
+          boxShadow: '0 6px 32px 0 rgba(80,80,140,0.09)',
+          border: '1.5px solid #f6f6fa',
+          background: '#fff',
+          transition: 'box-shadow 0.32s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s',
           overflow: 'hidden',
           position: 'relative',
-          backgroundColor: '#ffffff',
-          border: '1px solid #f0f0f0',
           '&:hover': {
-            boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
-            borderColor: '#667eea',
+            boxShadow: '0 18px 60px 0 rgba(80, 80, 180, 0.17)',
+            borderColor: '#6366f1'
           },
         }}
       >
         {/* Stock Status Badge */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 16,
-            right: 16,
-            zIndex: 2,
-          }}
-        >
+        <Box sx={{
+          position: 'absolute',
+          top: 18,
+          right: 18,
+          zIndex: 2,
+        }}>
           <Chip
-            icon={<Inventory sx={{ fontSize: 14 }} />}
+            icon={<Inventory sx={{ fontSize: 16 }} />}
             label={product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
             size="small"
             sx={{
               backgroundColor: product.stock > 0 ? '#22c55e' : '#ef4444',
               color: 'white',
               fontWeight: 600,
-              fontSize: '0.75rem',
+              fontSize: '0.77rem',
               height: 24,
-              '& .MuiChip-icon': {
-                color: 'white',
-              },
+              px: 1.4,
+              '& .MuiChip-icon': { color: 'white' },
             }}
           />
         </Box>
 
-        {/* Product Image - FIXED ASPECT RATIO */}
-        <Box
-          sx={{
-            position: 'relative',
-            width: '100%',
-            height: '280px', // FIXED HEIGHT
-            overflow: 'hidden',
-            backgroundColor: '#f8f9fa',
-          }}
-        >
-          <CardMedia
-            component="img"
-            sx={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover', // PROPER IMAGE FIT
-              objectPosition: 'center',
-              transition: 'transform 0.4s ease',
-              '&:hover': {
-                transform: 'scale(1.08)',
-              },
-            }}
-            image={product.images[0] || 'https://via.placeholder.com/300x280/f1f5f9/64748b?text=No+Image'}
-            alt={product.name}
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x280/f1f5f9/64748b?text=Image+Error';
-            }}
-          />
+        {/* Product Image Placement */}
+        <Box sx={{
+          width: '100%',
+          height: '340px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          backgroundColor: '#f7f7fa',
+          borderBottom: '1px solid #eeeeee'
+        }}>
+          {!imageError ? (
+            <CardMedia
+              component="img"
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain', // crucial for showing whole image
+                objectPosition: 'center',
+                transition: 'transform 0.4s cubic-bezier(0.2,0.85,0.4,1)',
+                '&:hover': { transform: 'scale(1.06)' }
+              }}
+              image={imageSources[0]}
+              alt={product.name}
+              onError={handleImageError}
+              onLoad={handleImageLoad}
+              loading="lazy"
+            />
+          ) : (
+            <Box
+              sx={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#f1f5f9',
+                color: '#64748b',
+                textAlign: 'center',
+                p: 2
+              }}
+            >
+              <Box sx={{
+                width: 68,
+                height: 68,
+                backgroundColor: '#e2e8f0',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mb: 2
+              }}>
+                <ShoppingCart sx={{ fontSize: 30, color: '#94a3b8' }} />
+              </Box>
+              <Typography variant="caption" sx={{ fontWeight: 500 }}>
+                {product.name.split(' ').slice(0, 2).join(' ')}
+              </Typography>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', mt: 0.5 }}>
+                Image not available
+              </Typography>
+            </Box>
+          )}
         </Box>
 
-        {/* Product Details - FIXED SPACING */}
+        {/* Product Details */}
         <CardContent 
-          sx={{ 
-            flexGrow: 1, 
+          sx={{
+            flexGrow: 1,
             p: 3,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
+            minHeight: 0
           }}
         >
-          <Box>
-            {/* Product Name */}
+          <Box sx={{ flex: '1 1 auto', mb: 2 }}>
             <Typography
               variant="h6"
               component="h3"
               sx={{
-                fontWeight: 600,
+                fontWeight: 700,
                 color: '#1e293b',
                 mb: 1,
-                fontSize: '1.1rem',
-                lineHeight: 1.3,
-                height: '2.6rem', // FIXED HEIGHT for consistency
+                fontSize: '1.17rem',
+                lineHeight: 1.33,
+                height: '2.5rem',
                 overflow: 'hidden',
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
@@ -155,78 +241,65 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }
             >
               {product.name}
             </Typography>
-
-            {/* Product Description */}
             <Typography
               variant="body2"
               color="text.secondary"
               sx={{
                 mb: 2,
-                height: '2.4rem', // FIXED HEIGHT
+                height: '2.25rem',
                 overflow: 'hidden',
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: 'vertical',
-                lineHeight: 1.2,
-                fontSize: '0.875rem',
+                lineHeight: 1.25,
+                fontSize: '0.92rem'
               }}
             >
               {product.description}
             </Typography>
           </Box>
-
-          {/* Price and Button */}
           <Box>
             <Box sx={{ mb: 2 }}>
               <Typography
                 variant="h5"
                 sx={{
                   fontWeight: 700,
-                  color: '#667eea',
-                  fontSize: '1.5rem',
+                  color: '#6366f1',
+                  fontSize: '1.47rem',
                 }}
               >
                 {formatPrice(product.price)}
               </Typography>
             </Box>
-
-            {/* Add to Cart Button */}
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
+            <motion.div whileHover={{ scale: 1.025 }} whileTap={{ scale: 0.97 }}>
               <Button
                 fullWidth
                 variant="contained"
-                startIcon={<ShoppingCart sx={{ fontSize: 18 }} />}
+                startIcon={<ShoppingCart sx={{ fontSize: 19 }} />}
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
                 sx={{
-                  py: 1.2,
-                  borderRadius: 2,
+                  py: 1.35,
+                  borderRadius: 2.2,
                   background: product.stock > 0 
-                    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
-                    : '#e2e8f0',
+                    ? 'linear-gradient(135deg, #6366f1 0%, #5f59e5 100%)' 
+                    : '#f0f0f0',
                   color: product.stock > 0 ? 'white' : '#64748b',
-                  fontWeight: 600,
-                  fontSize: '0.95rem',
+                  fontWeight: 700,
+                  fontSize: '1.01rem',
                   textTransform: 'none',
-                  transition: 'all 0.3s ease',
-                  boxShadow: product.stock > 0 
-                    ? '0 4px 12px rgba(102, 126, 234, 0.4)' 
+                  boxShadow: product.stock > 0
+                    ? '0 2px 12px rgba(102, 102, 241, 0.13)'
                     : 'none',
                   '&:hover': {
                     background: product.stock > 0 
-                      ? 'linear-gradient(135deg, #5a67d8 0%, #667eea 100%)' 
-                      : '#e2e8f0',
-                    boxShadow: product.stock > 0 
-                      ? '0 6px 20px rgba(102, 126, 234, 0.6)' 
-                      : 'none',
+                      ? 'linear-gradient(135deg, #5145ea 0%, #6366f1 100%)'
+                      : '#e5e7eb'
                   },
                   '&:disabled': {
-                    background: '#e2e8f0',
+                    background: '#f3f4f6',
                     color: '#94a3b8',
-                  },
+                  }
                 }}
               >
                 {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
