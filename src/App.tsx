@@ -18,6 +18,10 @@ import AdminLogin from './pages/Admin/AdminLogin/AdminLogin';
 import AdminDashboard from './pages/Admin/AdminDashboard/AdminDashboard';
 import AdminGuard from './pages/Admin/AdminGuard/AdminGuard';
 
+// NEW: Import your stunning homepage
+import Homepage from './pages/Home/Homepage';
+import './styles/globals.css';
+
 // Enhanced Global Styles for modern look
 const globalStyles = (
   <GlobalStyles
@@ -149,7 +153,11 @@ const AnimatedRoutes: React.FC = () => {
   return (
     <AnimatePresence mode="wait" initial={false}>
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* UPDATED: Changed root route to show Homepage instead of redirecting to login */}
+        <Route path="/" element={<Homepage />} />
+        
+        {/* NEW: Add dedicated homepage route */}
+        <Route path="/home" element={<Homepage />} />
 
         {/* Authentication */}
         <Route path="/login" element={<LoginPage />} />
@@ -171,7 +179,13 @@ const AnimatedRoutes: React.FC = () => {
           }
         />
 
-        {/* Fallback */}
+        {/* NEW: Add category routes for homepage navigation */}
+        <Route path="/categories/:category" element={<Homepage />} />
+        <Route path="/deals" element={<Homepage />} />
+        <Route path="/products" element={<Homepage />} />
+        <Route path="/product/:id" element={<Homepage />} />
+
+        {/* Fallback - Keep your existing fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </AnimatePresence>

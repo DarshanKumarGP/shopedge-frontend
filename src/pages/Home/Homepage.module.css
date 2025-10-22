@@ -1,0 +1,16 @@
+.homepage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.mainContent {
+  flex: 1;
+}
+
+/* Smooth scroll for the entire page */
+@media (prefers-reduced-motion: no-preference) {
+  .homepage {
+    scroll-behavior: smooth;
+  }
+}

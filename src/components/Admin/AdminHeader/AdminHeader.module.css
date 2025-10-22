@@ -9,7 +9,7 @@
   justify-content: space-between;
   min-height: 80px;
   z-index: 100;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .headerBackground {
@@ -122,52 +122,6 @@
   gap: 16px;
 }
 
-.notificationButton,
-.settingsButton {
-  position: relative;
-  width: 44px;
-  height: 44px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.notificationButton:hover,
-.settingsButton:hover {
-  background: rgba(59, 130, 246, 0.2);
-  border-color: rgba(59, 130, 246, 0.4);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
-}
-
-.controlIcon {
-  width: 20px;
-  height: 20px;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.notificationBadge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 20px;
-  height: 20px;
-  background: linear-gradient(135deg, rgb(239, 68, 68), rgb(220, 38, 38));
-  border: 2px solid rgb(15, 23, 42);
-  border-radius: 50%;
-  font-size: 10px;
-  font-weight: 600;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* Profile Section */
 .profileSection {
   position: relative;
@@ -208,6 +162,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .avatarIcon {
@@ -249,6 +204,7 @@
   height: 16px;
   color: rgba(255, 255, 255, 0.6);
   transition: transform 0.3s ease;
+  flex-shrink: 0;
 }
 
 .dropdownIcon.rotated {
@@ -258,77 +214,100 @@
 /* Dropdown Menu */
 .dropdownMenu {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 12px);
   right: 0;
-  background: rgba(15, 23, 42, 0.95);
+  background: rgba(15, 23, 42, 0.98);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 16px;
-  min-width: 250px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  min-width: 280px;
+  max-width: 320px;
+  box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.7),
+              0 0 0 1px rgba(59, 130, 246, 0.1);
   overflow: hidden;
-  z-index: 1000;
+  z-index: 10000;
 }
 
 .dropdownHeader {
   padding: 20px;
-  background: rgba(59, 130, 246, 0.1);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(147, 51, 234, 0.1) 100%);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .adminDetails {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   color: white;
 }
 
 .adminDetails strong {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .adminDetails span {
   font-size: 12px;
   color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
 }
 
 .onlineStatus {
   color: rgb(34, 197, 94) !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
 }
 
 .dropdownDivider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
+  margin: 8px 0;
 }
 
 .dropdownItem {
   width: 100%;
-  padding: 16px 20px;
+  padding: 14px 20px;
   background: transparent;
   border: none;
   display: flex;
   align-items: center;
   gap: 12px;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.85);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   font-size: 14px;
   font-weight: 500;
+  text-align: left;
 }
 
 .dropdownItem:hover {
-  color: rgb(248, 113, 113);
+  color: rgb(59, 130, 246);
+  padding-left: 24px;
 }
 
 .dropdownItem:disabled {
-  opacity: 0.7;
+  opacity: 0.5;
   cursor: not-allowed;
+}
+
+.dropdownItem.logoutItem {
+  color: rgba(239, 68, 68, 0.9);
+  border-top: 1px solid rgba(59, 130, 246, 0.1);
+  margin-top: 4px;
+}
+
+.dropdownItem.logoutItem:hover {
+  color: rgb(248, 113, 113);
+  background: rgba(239, 68, 68, 0.1);
 }
 
 .dropdownItemIcon {
   width: 18px;
   height: 18px;
+  flex-shrink: 0;
 }
 
 .loadingSpinner {
@@ -344,23 +323,6 @@
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
-}
-
-/* Security Badge */
-.securityBadge {
-  position: absolute;
-  bottom: -24px;
-  right: 32px;
-  background: rgba(34, 197, 94, 0.2);
-  border: 1px solid rgba(34, 197, 94, 0.4);
-  border-radius: 20px;
-  padding: 6px 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: rgb(34, 197, 94);
-  font-weight: 600;
 }
 
 /* Responsive Design */
@@ -387,8 +349,9 @@
     gap: 12px;
   }
 
-  .securityBadge {
-    display: none;
+  .dropdownMenu {
+    min-width: 260px;
+    right: -10px;
   }
 }
 
@@ -412,9 +375,8 @@
     font-size: 20px;
   }
 
-  .notificationButton,
-  .settingsButton {
-    width: 36px;
-    height: 36px;
+  .dropdownMenu {
+    min-width: 240px;
+    right: -20px;
   }
 }

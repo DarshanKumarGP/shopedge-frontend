@@ -1,15 +1,18 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Shield, 
   User, 
   LogOut, 
-  Settings, 
-  Bell,
   ChevronDown,
   Activity,
-  Crown
+  Crown,
+  BarChart3,
+  Users,
+  Package,
+  Settings
 } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAdminAuth } from '../../../hooks/useAdminAuth';
 import styles from './AdminHeader.module.css';
 
@@ -24,12 +27,41 @@ interface AdminHeaderProps {
 const AdminHeader: React.FC<AdminHeaderProps> = ({ adminData }) => {
   const { adminLogout, isAdminLoggingOut } = useAdminAuth();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
 
   const handleLogout = async () => {
     try {
+      setIsDropdownOpen(false);
       await adminLogout();
     } catch (error) {
       console.error('Logout error:', error);
+    }
+  };
+
+  const handleNavigation = (path: string) => {
+    setIsDropdownOpen(false);
+    // Only navigate if not already on the page
+    if (location.pathname !== path) {
+      navigate(path);
     }
   };
 
@@ -52,6 +84,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ adminData }) => {
           className={styles.logoContainer}
           whileHover={{ scale: 1.05 }}
           transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+          onClick={() => handleNavigation('/admin/dashboard')}
         >
           <Shield className={styles.logoIcon} />
           <div className={styles.logoGlow}></div>
@@ -67,27 +100,8 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ adminData }) => {
 
       {/* Admin Controls */}
       <div className={styles.adminControls}>
-        {/* Notifications */}
-        <motion.button 
-          className={styles.notificationButton}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Bell className={styles.controlIcon} />
-          <div className={styles.notificationBadge}>3</div>
-        </motion.button>
-
-        {/* Settings */}
-        <motion.button 
-          className={styles.settingsButton}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Settings className={styles.controlIcon} />
-        </motion.button>
-
         {/* Admin Profile Dropdown */}
-        <div className={styles.profileSection}>
+        <div className={styles.profileSection} ref={dropdownRef}>
           <motion.button 
             className={styles.profileButton}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -101,7 +115,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ adminData }) => {
               </div>
               <div className={styles.profileText}>
                 <span className={styles.adminName}>
-                  {adminData?.username || 'Administrator'}
+                  {adminData?.username || 'ADMIN'}
                 </span>
                 <span className={styles.adminRole}>Super Admin</span>
               </div>
@@ -112,48 +126,91 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ adminData }) => {
           </motion.button>
 
           {/* Dropdown Menu */}
-          {isDropdownOpen && (
-            <motion.div 
-              className={styles.dropdownMenu}
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className={styles.dropdownHeader}>
-                <div className={styles.adminDetails}>
-                  <strong>{adminData?.username || 'Administrator'}</strong>
-                  <span>ID: {adminData?.userId || 'N/A'}</span>
-                  <span className={styles.onlineStatus}>● Online</span>
-                </div>
-              </div>
-              
-              <div className={styles.dropdownDivider}></div>
-              
-              <motion.button 
-                className={styles.dropdownItem}
-                onClick={handleLogout}
-                disabled={isAdminLoggingOut}
-                whileHover={{ backgroundColor: 'rgba(239, 68, 68, 0.1)' }}
+          <AnimatePresence>
+            {isDropdownOpen && (
+              <motion.div 
+                className={styles.dropdownMenu}
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
               >
-                <LogOut className={styles.dropdownItemIcon} />
-                <span>
-                  {isAdminLoggingOut ? 'Signing out...' : 'Sign Out'}
-                </span>
-                {isAdminLoggingOut && (
-                  <div className={styles.loadingSpinner}></div>
-                )}
-              </motion.button>
-            </motion.div>
-          )}
-        </div>
-      </div>
+                <div className={styles.dropdownHeader}>
+                  <div className={styles.adminDetails}>
+                    <strong>{adminData?.username || 'ADMIN'}</strong>
+                    <span>ID: #{adminData?.userId || 'N/A'}</span>
+                    <span className={styles.onlineStatus}>● Online</span>
+                  </div>
+                </div>
+                
+                <div className={styles.dropdownDivider}></div>
+                
+                {/* Dashboard Link */}
+                <motion.button 
+                  className={styles.dropdownItem}
+                  onClick={() => handleNavigation('/admin/dashboard')}
+                  whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <BarChart3 className={styles.dropdownItemIcon} />
+                  <span>Dashboard</span>
+                </motion.button>
 
-      {/* Security Badge */}
-      <div className={styles.securityBadge}>
-        <Shield size={16} />
-        <span>Secure Session</span>
+                {/* User Management */}
+                <motion.button 
+                  className={styles.dropdownItem}
+                  onClick={() => handleNavigation('/admin/users')}
+                  whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Users className={styles.dropdownItemIcon} />
+                  <span>User Management</span>
+                </motion.button>
+
+                {/* Product Management */}
+                <motion.button 
+                  className={styles.dropdownItem}
+                  onClick={() => handleNavigation('/admin/products')}
+                  whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Package className={styles.dropdownItemIcon} />
+                  <span>Product Management</span>
+                </motion.button>
+
+                {/* Settings */}
+                <motion.button 
+                  className={styles.dropdownItem}
+                  onClick={() => handleNavigation('/admin/settings')}
+                  whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Settings className={styles.dropdownItemIcon} />
+                  <span>Settings</span>
+                </motion.button>
+                
+                <div className={styles.dropdownDivider}></div>
+                
+                {/* Logout */}
+                <motion.button 
+                  className={`${styles.dropdownItem} ${styles.logoutItem}`}
+                  onClick={handleLogout}
+                  disabled={isAdminLoggingOut}
+                  whileHover={{ backgroundColor: 'rgba(239, 68, 68, 0.1)' }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <LogOut className={styles.dropdownItemIcon} />
+                  <span>
+                    {isAdminLoggingOut ? 'Signing out...' : 'Sign Out'}
+                  </span>
+                  {isAdminLoggingOut && (
+                    <div className={styles.loadingSpinner}></div>
+                  )}
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </motion.header>
   );
